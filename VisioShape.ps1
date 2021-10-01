@@ -137,9 +137,9 @@ Function Get-VisioShape{
 
         Function:      New-VisioRackShape
         Created by:    Martin Cooper
-        Date:          26/09/2021
+        Date:          01/10/2021
         GitHub:        https://github.com/mc1903
-        Version:       1.1
+        Version:       1.2
 
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -235,14 +235,14 @@ Function Get-VisioShape{
 Function New-VisioRackShape{
     [CmdletBinding(SupportsShouldProcess=$True)]
     Param (
-	    [Parameter(Mandatory=$true)]$Master,
-	    [Parameter(Mandatory=$true)]$Label,
-	    [Parameter(Mandatory=$false)]$Name,
-	    [Parameter(Mandatory=$true)]$RackLabel,
-	    [Parameter(Mandatory=$true)]$RackVendor,
-	    [Parameter(Mandatory=$true)]$FirstU,
-		[Parameter(Mandatory=$false)]$X,
-		[Parameter(Mandatory=$false)]$Y
+        [Parameter(Mandatory=$true)]$Master,
+        [Parameter(Mandatory=$true)]$Label,
+        [Parameter(Mandatory=$false)]$Name,
+        [Parameter(Mandatory=$true)]$RackLabel,
+        [Parameter(Mandatory=$true)]$RackVendor,
+        [Parameter(Mandatory=$true)]$FirstU,
+        [Parameter(Mandatory=$false)]$X,
+        [Parameter(Mandatory=$false)]$Y
     )
     If($PSCmdlet.ShouldProcess('Visio','Drop a new rack equipment shape and connect to an existing rack shape')){
         If($Master -is [string]){
@@ -299,33 +299,31 @@ Function New-VisioRackShape{
 
         }
 
-<#
-    @Mike - unsure where $updatemode is set and if I need to worry about it here?
-
-        if($updateMode){
+        If($updateMode){
             $DroppedShape=$p.Shapes | Where-Object {$_.Name -eq $Label}
         }
-#>
-
-        Write-Verbose "Rack Vendor $RackVendor"
-        Write-Verbose "BeginXY: $BeginXY"
-        Write-Verbose "  EndXY: $EndXY"
-
-        $DroppedShape=$p.Drop($Master.PSObject.BaseObject,$X,$Y)
-        $DroppedShape.Name=$Name
-        $DroppedShape.Text=$Label
-        $DroppedShape.Cells("BeginX").FormulaU = $BeginXY
-        $DroppedShape.Cells("BeginY").FormulaU = $BeginXY
-        $DroppedShape.Cells("EndX").FormulaU = $EndXY
-        $DroppedShape.Cells("EndY").FormulaU = $EndXY
-
-        New-Variable -Name $Name -Value $DroppedShape -Scope Global -Force
-        
-        If ($PSBoundParameters['Verbose']) {
-            Write-Output $DroppedShape
+        Else {
+            Write-Verbose "Rack Vendor $RackVendor"
+            Write-Verbose "BeginXY: $BeginXY"
+            Write-Verbose "  EndXY: $EndXY"
+    
+            $DroppedShape=$p.Drop($Master.PSObject.BaseObject,$X,$Y)
+            $DroppedShape.Name=$Name
+            $DroppedShape.Text=$Label
+            $DroppedShape.Cells("BeginX").FormulaU = $BeginXY
+            $DroppedShape.Cells("BeginY").FormulaU = $BeginXY
+            $DroppedShape.Cells("EndX").FormulaU = $EndXY
+            $DroppedShape.Cells("EndY").FormulaU = $EndXY
+    
+            New-Variable -Name $Name -Value $DroppedShape -Scope Global -Force
+            
+            If ($PSBoundParameters['Verbose']) {
+                Write-Output $DroppedShape
+            }
+            
+            $Script:LastDroppedObject=$DroppedShape
         }
-        
-        $Script:LastDroppedObject=$DroppedShape
+
     }
 
 }
