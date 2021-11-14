@@ -106,40 +106,14 @@ Function Register-VisioShape{
 }
 
 <#
-        .SYNOPSIS 
-        Retrieves a saved shape definition
-
-        .DESCRIPTION
-        Retrieves a saved shape definition
-
-        .PARAMETER Name
-        Describe Parameter1
-
-        .INPUTS
-        None. You cannot pipe objects to Get-VisioShape
-
-        .OUTPUTS
-        Visio.Shape
-
-        .EXAMPLE
-        Get-VisioShape Block
-
-#>
-Function Get-VisioShape{
-    [CmdletBinding()]
-    Param([string]$Name)
-    $script:Shapes[$Name]
-}
-
-<#
         .NOTES
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         Function:      New-VisioRackShape
         Created by:    Martin Cooper
-        Date:          01/10/2021
+        Date:          14/11/2021
         GitHub:        https://github.com/mc1903
-        Version:       1.2
+        Version:       1.4
 
         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -220,12 +194,6 @@ Function Get-VisioShape{
         .PARAMETER FirstU
         The first (lowest) U space in which to place the new rack equipment shape.
 
-        .PARAMETER X
-        The X position used for initial new rack equipment shape placement (in inches) prior to connecting it to the existing rack shape. If not provided the default X position = 1
-
-        .PARAMETER Y
-        The Y position used for initial new rack equipment shape placement (in inches) prior to connecting it to the existing rack shape. If not provided the default Y position = 0.25
-
         .OUTPUTS
         Visio.Shape
 
@@ -234,96 +202,97 @@ Function Get-VisioShape{
 #>
 Function New-VisioRackShape{
     [CmdletBinding(SupportsShouldProcess=$True)]
-    Param (
+    Param(
         [Parameter(Mandatory=$true)]$Master,
         [Parameter(Mandatory=$true)]$Label,
         [Parameter(Mandatory=$false)]$Name,
         [Parameter(Mandatory=$true)]$RackLabel,
         [Parameter(Mandatory=$true)]$RackVendor,
-        [Parameter(Mandatory=$true)]$FirstU,
-        [Parameter(Mandatory=$false)]$X,
-        [Parameter(Mandatory=$false)]$Y
+        [Parameter(Mandatory=$true)]$FirstU
     )
     If($PSCmdlet.ShouldProcess('Visio','Drop a new rack equipment shape and connect to an existing rack shape')){
         If($Master -is [string]){
             $Master=$script:Shapes[$Master]
         }
+
         If(!$Name){
             $Name=$Label
         }
 
-        If(!$X){
-            $X=1.00
-        }
-
-        If(!$Y){
-            $Y=0.25
-        }
-
         $p=Get-VisioPage
+        
+        $p.Application.ScreenUpdating = 0
+        
         $ExistingRackShape=$p.Shapes | Where-Object {$_.Name -eq $RackLabel}
+        
         If(!$ExistingRackShape){
             Write-Verbose "Existing rack shape $RackLabel was NOT found on the active page $($p.Name). Skipping!"
             Break
         }
-        Else {
+        Else{
             Write-Verbose "Existing rack shape $RackLabel was found on the active page $($p.Name)."
-            If ($RackVendor -match 'HPE') {
-                $FirstUBXY = $FirstU | ForEach-Object { $_.ToString("00") }
-                $FirstUEXY = $FirstU | ForEach-Object { $_.ToString("00") }
-                $BeginXY = "=PAR(PNT($RackLabel!Connections.U$($FirstUBXY)B.X,$RackLabel!Connections.U$($FirstUBXY)B.Y))"
-                $EndXY = "=PAR(PNT($RackLabel!Connections.U$($FirstUEXY)E.X,$RackLabel!Connections.U$($FirstUEXY)E.Y))"
+            If($RackVendor -match 'HPE'){
+                $FirstUBXY=$FirstU | ForEach-Object { $_.ToString("00") }
+                $FirstUEXY=$FirstU | ForEach-Object { $_.ToString("00") }
+                $BeginXY="=PAR(PNT($RackLabel!Connections.U$($FirstUBXY)B.X,$RackLabel!Connections.U$($FirstUBXY)B.Y))"
+                $EndXY="=PAR(PNT($RackLabel!Connections.U$($FirstUEXY)E.X,$RackLabel!Connections.U$($FirstUEXY)E.Y))"
             }
-            ElseIf ($RackVendor -match 'Dell') {
-                $FirstUBXY = $FirstU*2+3
-                $FirstUEXY = $FirstU*2+4
-                $BeginXY = "=PAR(PNT($RackLabel!Connections.X$($FirstUBXY),$RackLabel!Connections.Y$($FirstUBXY)))"
-                $EndXY = "=PAR(PNT($RackLabel!Connections.X$($FirstUEXY),$RackLabel!Connections.Y$($FirstUEXY)))"
+            ElseIf($RackVendor -match 'Dell'){
+                $FirstUBXY=$FirstU*2+3
+                $FirstUEXY=$FirstU*2+4
+                $BeginXY="=PAR(PNT($RackLabel!Connections.X$($FirstUBXY),$RackLabel!Connections.Y$($FirstUBXY)))"
+                $EndXY="=PAR(PNT($RackLabel!Connections.X$($FirstUEXY),$RackLabel!Connections.Y$($FirstUEXY)))"
             }
-            ElseIf ($RackVendor -match 'IBM') {
-                $FirstUBXY = $FirstU*2+3
-                $FirstUEXY = $FirstU*2+4
-                $BeginXY = "=PAR(PNT($RackLabel!Connections.X$($FirstUBXY),$RackLabel!Connections.Y$($FirstUBXY)))"
-                $EndXY = "=PAR(PNT($RackLabel!Connections.X$($FirstUEXY),$RackLabel!Connections.Y$($FirstUEXY)))"
+            ElseIf($RackVendor -match 'IBM'){
+                $FirstUBXY=$FirstU*2+3
+                $FirstUEXY=$FirstU*2+4
+                $BeginXY="=PAR(PNT($RackLabel!Connections.X$($FirstUBXY),$RackLabel!Connections.Y$($FirstUBXY)))"
+                $EndXY="=PAR(PNT($RackLabel!Connections.X$($FirstUEXY),$RackLabel!Connections.Y$($FirstUEXY)))"
             }
-            ElseIf ($RackVendor -match 'Cisco') {
-                $FirstUBXY = $FirstU
-                $FirstUEXY = $FirstU
-                $BeginXY = "=PAR(PNT($RackLabel!Connections.Cab$($FirstUBXY)A.X,$RackLabel!Connections.Cab$($FirstUBXY)A.Y))"
-                $EndXY = "=PAR(PNT($RackLabel!Connections.Cab$($FirstUBXY)B.X,$RackLabel!Connections.Cab$($FirstUBXY)B.Y))"
+            ElseIf($RackVendor -match 'Cisco'){
+                $FirstUBXY=$FirstU
+                $FirstUEXY=$FirstU
+                $BeginXY="=PAR(PNT($RackLabel!Connections.Cab$($FirstUBXY)A.X,$RackLabel!Connections.Cab$($FirstUBXY)A.Y))"
+                $EndXY="=PAR(PNT($RackLabel!Connections.Cab$($FirstUBXY)B.X,$RackLabel!Connections.Cab$($FirstUBXY)B.Y))"
             }
-            Else {
+            Else{
                 Write-Verbose "Rack Vendor $RackVendor is NOT known/supported. Skipping!"
                 Break
             }
 
         }
 
-        If($updateMode){
+        If($UpdateMode){
             $DroppedShape=$p.Shapes | Where-Object {$_.Name -eq $Label}
+            If(!$DroppedShape){
+                $DroppedShape=$p.Drop($Master.PSObject.BaseObject,0,0)
+                $DroppedShape.Name=$Name
+                $DroppedShape.Text=$Label
+            }
         }
-        Else {
-            Write-Verbose "Rack Vendor $RackVendor"
-            Write-Verbose "BeginXY: $BeginXY"
-            Write-Verbose "  EndXY: $EndXY"
-    
-            $DroppedShape=$p.Drop($Master.PSObject.BaseObject,$X,$Y)
+        Else{
+            $DroppedShape=$p.Drop($Master.PSObject.BaseObject,0,0)
             $DroppedShape.Name=$Name
             $DroppedShape.Text=$Label
-            $DroppedShape.Cells("BeginX").FormulaU = $BeginXY
-            $DroppedShape.Cells("BeginY").FormulaU = $BeginXY
-            $DroppedShape.Cells("EndX").FormulaU = $EndXY
-            $DroppedShape.Cells("EndY").FormulaU = $EndXY
-    
-            New-Variable -Name $Name -Value $DroppedShape -Scope Global -Force
-            
-            If ($PSBoundParameters['Verbose']) {
-                Write-Output $DroppedShape
-            }
-            
-            $Script:LastDroppedObject=$DroppedShape
         }
 
-    }
+        $DroppedShape.Cells("BeginX").FormulaU=$BeginXY
+        $DroppedShape.Cells("BeginY").FormulaU=$BeginXY
+        $DroppedShape.Cells("EndX").FormulaU=$EndXY
+        $DroppedShape.Cells("EndY").FormulaU=$EndXY
+    
+        $p.Application.ScreenUpdating = -1
+	
+        New-Variable -Name $Name -Value $DroppedShape -Scope Global -Force  
+        $DroppedShape
+        $Script:LastDroppedObject=$DroppedShape
 
-}
+		Write-Verbose "Rack Vendor: $RackVendor"
+		Write-Verbose "BeginXY: $BeginXY"
+		Write-Verbose "  EndXY: $EndXY"
+		Write-Verbose "Name: $Name"
+		Write-Verbose "Label: $Label"
+		Write-Verbose "Update Mode: $UpdateMode"
+
+    }
+} 
