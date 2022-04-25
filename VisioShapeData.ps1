@@ -11,6 +11,9 @@
         .PARAMETER Name
         Which shape data field you want the value from
 
+        .PARAMETER All
+        Returns all shape data rather than just one
+
         .INPUTS
         None. You cannot pipe objects to Get-VisioShapeData.
 
@@ -23,9 +26,20 @@
 Function Get-VisioShapeData{
     [CmdletBinding()]
     Param($Shape,
-    $Name)
+    [string]$Name,
+    [switch]$All)
     
+    if($all){
+        0..($shape.Section(243).Count-1) | foreach-object {
+            [PSCustomObject]@{Label=$shape.CellsSRC(243,$_,2).Formula.Replace('"','')
+                              Name=$shape.CellsSRC(243,$_,2).RowName
+                              Value=$shape.CellsSRC(243,$_,0).Formula
+
+                              ValueObject=$shape.CellsSRC(243,$_,0)}
+        }
+    } else {
         $Shape.Cells("Prop.$Name").Formula.TrimStart('"').TrimEnd('"') 
+    }
 }
 
 <#
