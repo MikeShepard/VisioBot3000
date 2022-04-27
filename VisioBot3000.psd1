@@ -83,7 +83,7 @@ FunctionsToExport = 'Get-VisioColorFormula', 'Open-VisioDocument', 'Import-Visio
                'Register-VisioShape', 'Get-VisioShape', 'Add-StencilSearchPath', 
                'Remove-VisioPage', 'Register-VisioContainer', 
                'Set-NextShapePosition', 'Set-RelativePositionDirection', 
-               'Get-NextShapePosition'
+               'Get-NextShapePosition', 'New-VisioRackShape'
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()
