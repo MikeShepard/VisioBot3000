@@ -55,11 +55,11 @@ Function Get-NextShapePosition{
         return $LastDroppedObject
     } else {
         if($RelativeOrientation -eq 'Horizontal'){
-            $X=$LastDroppedObject.Cells('PinX').ResultIU + $LastDroppedObject.Cells('Width').ResultIU + 0.25
+            $X=$LastDroppedObject.Cells('PinX').ResultIU + $LastDroppedObject.Cells('Width').ResultIU + $script:DeltaX
             $Y=$LastDroppedObject.Cells('PinY').ResultIU 
         } else {
             $X=$LastDroppedObject.Cells('PinX').ResultIU 
-            $Y=$LastDroppedObject.Cells('PinY').ResultIU - $LastDroppedObject.Cells('Height').ResultIU - 0.25
+            $Y=$LastDroppedObject.Cells('PinY').ResultIU - $LastDroppedObject.Cells('Height').ResultIU - $script:DeltaY
         }
         Return @{X=$X;Y=$Y}
     }
@@ -91,5 +91,14 @@ Function Set-RelativePositionDirection{
     Param([ValidateSet('Horizontal','Vertical')]$Orientation)
     if($PSCmdlet.ShouldProcess('Visio','Sets VisioBot''s orientation for relative positioning')){
         $script:RelativeOrientation=$Orientation
+    }
+}
+
+Function Set-NextShapePositionDelta{
+    [CmdletBinding(SupportsShouldProcess=$true)]
+    Param($DeltaX=$script:DeltaX,$Deltay=$script:Deltay)
+    if($PSCmdlet.ShouldProcess("Setting next shape position delta to ($Deltax,$Deltay)")){
+        $script:DeltaX=$DeltaX
+        $script:DeltaY=$DeltaY
     }
 }

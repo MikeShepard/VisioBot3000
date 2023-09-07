@@ -62,7 +62,7 @@ Function New-VisioContainer {
                 $droppedContainer.Name = $Name
             } 
             $droppedContainer.ContainerProperties.SetMargin($vis.PageUnits, 0.25)
-            $containedObjects  | foreach-object { 
+            $containedObjects | select-object -Skip 1 | foreach-object { 
                 if (-not $updatemode -or ($droppedContainer.ContainerProperties.GetMemberShapes(16 + 2) -notcontains $_.ID)) {
                     $droppedcontainer.ContainerProperties.AddMember($_, 1)
                 }
