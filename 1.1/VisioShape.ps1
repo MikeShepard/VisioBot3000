@@ -29,36 +29,46 @@
 
 
 #>
-Function New-VisioShape{
-    [CmdletBinding(SupportsShouldProcess=$True)]
-    Param($Master,$Label,$X,$Y,$Name)
-    if($PSCmdlet.ShouldProcess('Visio','Drop shape on the page')){
-        if($Master -is [string]){
-            $Master=$script:Shapes[$Master]
+Function New-VisioShape {
+    [CmdletBinding(SupportsShouldProcess = $True)]
+    Param($Master, $Label, $X, $Y, $Name,$color,$height,$width)
+    if ($PSCmdlet.ShouldProcess('Visio', 'Drop shape on the page')) {
+        if ($Master -is [string]) {
+            $Master = $script:Shapes[$Master]
         }
-        if(!$Name){
-            $Name=$Label
+        if (!$Name) {
+            $Name = $Label
         }
  
-        $p=get-VisioPage
-        if($updateMode){
-            $DroppedShape=$p.Shapes | Where-Object {$_.Name -eq $Label}
+        $p = get-VisioPage
+        if ($updateMode) {
+            $DroppedShape = $p.Shapes | Where-Object { $_.Name -eq $Label }
         }
-        if(-not (get-variable DroppedShape -Scope Local -ErrorAction Ignore) -or ($null -eq $DroppedShape)){
-            if(-not $X){
-                $RelativePosition=Get-NextShapePosition
-                $X=$RelativePosition.X
-                $Y=$RelativePosition.Y
+        if (-not (Get-Variable DroppedShape -Scope Local -ErrorAction Ignore) -or ($null -eq $DroppedShape)) {
+            if (-not $X) {
+                $RelativePosition = Get-NextShapePosition
+                $X = $RelativePosition.X
+                $Y = $RelativePosition.Y
             }
-            $DroppedShape=$p.Drop($Master.PSObject.BaseObject,$X,$Y)
-            $DroppedShape.Name=$Name
+            $DroppedShape = $p.Drop($Master.PSObject.BaseObject, $X, $Y)
+            $DroppedShape.Name = $Name
         } else {
-            write-verbose "Existing shape <$Label> found"
+            Write-Verbose "Existing shape <$Label> found"
         }
-        $DroppedShape.Text=$Label
+        $DroppedShape.Text = $Label
+        if($color){
+            $ColorFormula=get-VisioColorFormula $color
+            $droppedShape.CellsU('FillForegnd').Formula=$ColorFormula
+        }
+        if($height){
+            $droppedShape.CellsU("height").Formula = $height
+        }  
+        if($width){
+            $droppedShape.CellsU("width").Formula = $width
+        }
         New-Variable -Name $Name -Value $DroppedShape -Scope Global -Force
-        write-output $DroppedShape
-        $Script:LastDroppedObject=$DroppedShape
+        Write-Output $DroppedShape
+        $Script:LastDroppedObject = $DroppedShape
     }
 
 }
@@ -89,19 +99,25 @@ Function New-VisioShape{
         Register-VisioShape -Name Block -StencilName BasicShapes -MasterName Block
 
 #>
-Function Register-VisioShape{
+Function Register-VisioShape {
     [CmdletBinding()]
     Param([string]$Name,
         [Alias('From')][string]$StencilName,
-    [string]$MasterName)
+        [string]$MasterName)
  
-    if(!$MasterName){
-        $MasterName=$Name
+    if (!$MasterName) {
+        $MasterName = $Name
     }
-    $newShape=$stencils[$StencilName].Masters | Where-Object {$_.Name -eq $MasterName}
-    $script:Shapes[$Name]=$newshape
-    $outerName=$Name 
-    new-item -Path Function:\ -Name "global`:$outername" -value {param($Label, $X,$Y, $Name) $Shape=get-visioshape $outername; New-VisioShape $Shape $Label $X $Y -name $Name}.GetNewClosure() -force  | out-null
+    if (-not $stencils.ContainsKey($StencilName)) {
+        throw "Stencil $StenciName not registered.  Use Register-VisioStencil to add it."
+    }
+    $newShape = $stencils[$StencilName].Masters | Where-Object { $_.Name -eq $MasterName }
+    if (-not $newShape) {
+        throw "Master $masterName not found in stencil $StencilName.  Use Get-VisioStencilMaster to investigate"
+    }
+    $script:Shapes[$Name] = $newshape
+    $outerName = $Name 
+    New-Item -Path Function:\ -Name "global`:$outername" -Value { param($Label, $X, $Y, $Name) $Shape = get-visioshape $outername; New-VisioShape $Shape $Label $X $Y -Name $Name }.GetNewClosure() -Force  | Out-Null
     $script:GlobalFunctions.Add($outerName) | Out-Null
 }
 
@@ -125,8 +141,27 @@ Function Register-VisioShape{
         Get-VisioShape Block
 
 #>
-Function Get-VisioShape{
+Function Get-VisioShape {
     [CmdletBinding()]
     Param([string]$Name)
-    $script:Shapes[$Name]
+    if ($Name) {
+        $script:Shapes[$Name]
+    } else {
+        $script:Shapes
+    }
+}
+
+
+function Get-VisioStencilMaster {
+    [CmdletBinding()]
+    Param($StencilName)
+    if ($stencilName) {
+        if ($stencils.ContainsKey($StencilName)) {
+            $stencils[$StencilName].Masters
+        }
+    } else {
+        foreach ($key in $stencils.keys) {
+            $stencils[$key].masters | ForEach-Object { [pscustomobject]@{Stencil = $key; Master = $_.Name } }
+        }
+    }
 }

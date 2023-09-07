@@ -27,34 +27,47 @@
         Register-VisioStencil -Name Connectors -Builtin
 
 #>
-Function Register-VisioStencil{
+Function Register-VisioStencil {
     [CmdletBinding()]
     Param([string]$Name,
         [Alias('From')][string]$Path,
-    [ValidateSet('Backgrounds','Borders','Containers','Callouts','Legends')][string]$BuiltIn)
-    if($BuiltIn){
-        $stencilID=@('Backgrounds','Borders','Containers','Callouts','Legends').IndexOf($BuiltIn)
-        $stencilPath=$Visio.GetBuiltInStencilFile($stencilID,$vis.MSDefault)
-        $stencil=$Visio.Documents.OpenEx($stencilPath,$vis.OpenHidden)
+        [ValidateSet('Backgrounds', 'Borders', 'Containers', 'Callouts', 'Legends')][string]$BuiltIn)
+    if ($BuiltIn) {
+        $stencilID = @('Backgrounds', 'Borders', 'Containers', 'Callouts', 'Legends').IndexOf($BuiltIn)
+        $stencilPath = $Visio.GetBuiltInStencilFile($stencilID, $vis.MSDefault)
+        $stencil = $Visio.Documents.OpenEx($stencilPath, $vis.OpenHidden)
          
     } else {
-        if($Path -eq (split-path -path $Path -leaf)){
+        if ($Path -eq (Split-Path -Path $Path -Leaf)) {
             #if the path is just a filename
-            if(-not(test-path $path)){
+            if (-not(Test-Path $path)) {
                 #and the filename doesn't exist in the current directory
-                foreach($folder in $StencilSearchPath){
-                    if (test-path (join-path -Path $folder -ChildPath $path)){
-                        $path=join-path -Path $folder -ChildPath $path
+                foreach ($folder in $StencilSearchPath) {
+                    if (Test-Path (Join-Path -Path $folder -ChildPath $path)) {
+                        $path = Join-Path -Path $folder -ChildPath $path
                         break
                     }
                 }
             }
         }
-        if (test-path $path){
-            $stencil=$Visio.Documents.OpenEx($Path,$vis.OpenHidden)
+        if (Test-Path $path) {
+            $stencil = $Visio.Documents.OpenEx($Path, $vis.OpenHidden)
         } else {
-            write-error "$path not found when registering the stencil"
+            Write-Error "$path not found when registering the stencil"
         }
     }  
-    $script:stencils[$Name]=$stencil
+    $script:stencils[$Name] = $stencil
+}
+
+function Get-VisioStencil {
+    [CmdletBinding()]
+    Param($Name)
+    if ($name) {
+        if ($script:stencils.ContainsKey($Name)) {
+            $script:stencils[$Name]
+        }
+    } else {
+        $script:stencils
+    }
+
 }
