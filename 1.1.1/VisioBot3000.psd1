@@ -12,7 +12,7 @@
 RootModule = 'VisioBot3000.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.1'
+ModuleVersion = '1.1.1'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -69,20 +69,20 @@ ScriptsToProcess = 'VisioConstants.ps1'
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = 'Get-VisioColorFormula', 'Open-VisioDocument', 'Import-VisioSettings', 
-               'Get-VisioShapeData', 'Set-StencilSearchPath', 
-               'Test-VisioApplication', 'Register-VisioStencil', 
-               'New-VisioApplication', 'Convert-VisioObjectToPSObject', 
-               'Get-StencilSearchPath', 'Get-VisioPage', 'Set-VisioPageLayout', 
-               'Set-VisioDiagramServices', 'New-VisioLayer', 'New-VisioDocument', 
-               'Complete-VisioDocument', 'Get-VisioDocument', 'New-VisioContainer', 
-               'Get-VisioApplication', 'Set-VisioText', 'Set-VisioShapeData', 
-               'New-VisioConnector', 'New-VisioShape', 'Register-VisioConnector', 
-               'New-VisioSelection', 'Get-VisioDiagramServices', 'New-VisioPage', 
-               'New-VisioHyperlink', 'Set-VisioPage', 'New-VisioRectangle', 
-               'Register-VisioShape', 'Get-VisioShape', 'Add-StencilSearchPath', 
-               'Remove-VisioPage', 'Register-VisioContainer', 
-               'Set-NextShapePosition', 'Set-RelativePositionDirection', 
+FunctionsToExport = 'Get-VisioColorFormula', 'Open-VisioDocument', 'Import-VisioSettings',
+               'Get-VisioShapeData', 'Set-StencilSearchPath',
+               'Test-VisioApplication', 'Register-VisioStencil',
+               'New-VisioApplication', 'Convert-VisioObjectToPSObject',
+               'Get-StencilSearchPath', 'Get-VisioPage', 'Set-VisioPageLayout',
+               'Set-VisioDiagramServices', 'New-VisioLayer', 'New-VisioDocument',
+               'Complete-VisioDocument', 'Get-VisioDocument', 'New-VisioContainer',
+               'Get-VisioApplication', 'Set-VisioText', 'Set-VisioShapeData',
+               'New-VisioConnector', 'New-VisioShape', 'Register-VisioConnector',
+               'New-VisioSelection', 'Get-VisioDiagramServices', 'New-VisioPage',
+               'New-VisioHyperlink', 'Set-VisioPage', 'New-VisioRectangle',
+               'Register-VisioShape', 'Get-VisioShape', 'Add-StencilSearchPath',
+               'Remove-VisioPage', 'Register-VisioContainer',
+               'Set-NextShapePosition', 'Set-RelativePositionDirection',
                'Get-NextShapePosition','Set-NextShapePositionDelta',
                'Get-VisioStencilMaster','Get-VisioStencil'
 
@@ -93,7 +93,7 @@ CmdletsToExport = @()
 VariablesToExport = 'VIS'
 
 # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
-AliasesToExport = 'Layer', 'Legend', 'Diagram', 'Complete-Diagram', 'Shape', 'Connector', 
+AliasesToExport = 'Layer', 'Legend', 'Diagram', 'Complete-Diagram', 'Shape', 'Connector',
                'Stencil', 'HyperLink', 'Container'
 
 # DSC resources to export from this module
@@ -129,7 +129,7 @@ PrivateData = @{
         # ExternalModuleDependencies = ''
 
     } # End of PSData hashtable
-    
+
  } # End of PrivateData hashtable
 
 # HelpInfo URI of this module
