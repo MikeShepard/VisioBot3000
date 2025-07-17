@@ -1,5 +1,5 @@
 ﻿<#
-        .SYNOPSIS 
+        .SYNOPSIS
         Returns a shape data field from a shape
 
         .DESCRIPTION
@@ -28,7 +28,7 @@ Function Get-VisioShapeData{
     Param($Shape,
     [string]$Name,
     [switch]$All)
-    
+
     if($all){
         0..($shape.Section(243).Count-1) | foreach-object {
             [PSCustomObject]@{Label=$shape.CellsSRC(243,$_,2).Formula.Replace('"','')
@@ -38,12 +38,16 @@ Function Get-VisioShapeData{
                               ValueObject=$shape.CellsSRC(243,$_,0)}
         }
     } else {
-        $Shape.Cells("Prop.$Name").Formula.TrimStart('"').TrimEnd('"') 
+        try {
+        $Shape.Cells("Prop.$Name").Formula.TrimStart('"').TrimEnd('"')
+        } catch {
+          $null
+        }
     }
 }
 
 <#
-        .SYNOPSIS 
+        .SYNOPSIS
         Sets the value of a shape data field.
 
         .DESCRIPTION
